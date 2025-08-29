@@ -1,0 +1,59 @@
+# Weekly Github Activity Report
+
+## Overview
+
+This report summarizes the GitHub activity for the Quantus-Network organization over the past week. The data includes events related to pull requests, pushes, issue comments and review activity across multiple repositories.
+
+## Key Statistics
+
+*   **Total Events:** 44
+*   **Repositories with Activity:**
+    *   plonky2
+    *   poseidon-resonance
+    *   improvement-proposals
+    *   chain
+    *   rusty-crystals
+    *   n8n-workflows
+*   **Users Involved:** illuzen, ethan-crypto, n13, dastansam, exunico
+
+## Activity Breakdown by Event Type
+
+*   **PushEvent:** 21 - Represents code pushes to various repositories.
+*   **PullRequestEvent:** 9 - Includes opening, closing and merging of pull requests.
+*   **PullRequestReviewEvent:** 6 - Represents code reviews on pull requests.
+*   **PullRequestReviewCommentEvent:** 4 - Represents comments on code reviews in pull requests.
+*   **CreateEvent:** 4 - Includes creation of new branches and repositories.
+*   **IssueCommentEvent:** 1 - Adding a comment to an issue.
+*   **IssuesEvent:** 1 - Issue being opened
+
+## Repository Deep Dive
+
+### chain
+
+*   High activity with 20 events, primarily around the `high_security_account_implementation` branch.
+*   Nik (`n13`) is actively pushing commits, creating pull requests, reviewing code, and making comments.
+*   The work seems to be focused on implementing and refining a high-security account feature, including integration tests and addressing linting/formatting issues.
+*   One issue (`External miner fails to call runtime export`) was reported in chain repo, requires investigation.
+
+### poseidon-resonance
+
+*   `ethan-crypto` has been actively working on the `injective-felt-embeddings` feature.
+*   One pull request was opened, one closed related to this embedding feature.
+
+### improvement-proposals
+
+*   `illuzen` opened and subsequently merged a pull request `QIP-0012` related to a quantum secure bridge.
+
+## Potential Issues and Items Requiring Attention
+
+1.  **Chain - Sync Engine Fix:** The back and forth with commits and reverts in the `sync_engine_fix` branch on the `chain` repository suggests that the fix for sync issues may be unstable or require further refinement.  Review of the changes is needed. It seems the fix improves performance under bad network conditions.
+2.  **Chain - External Miner Export Error**: The issue reported by `exunico` suggests a possible API incompatibility between the miner and the runtime environment. This needs investigation to ensure compatibility of external miners with the current chain runtime.
+3.  **Review Load on Nik:** Nik (`n13`) appears to be heavily involved in the `chain` repository with many commits, reviews, and comments. Ensure that the workload is sustainable.
+4.  **Draft PR cleanup:** PR 190 was opened and then immediately closed with "Draft PR to clean up code - won't be used." Check if there are other open PR's that should be the primary focus.
+
+## Recommendations
+
+*   Investigate the reported issues with the chain sync engine and the external miner export error.
+*   Consider allocating additional resources or reviewers to the `chain` repository to support Nik's efforts.
+*   Ensure proper testing and validation are performed for any code changes before merging.
+
