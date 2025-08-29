@@ -1,0 +1,298 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "49c79d5f-ddf1-4f10-86ed-613405971b84",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "owner": {
+          "__rl": true,
+          "value": "Quantus-Network",
+          "mode": "list",
+          "cachedResultName": "Quantus-Network",
+          "cachedResultUrl": "https://github.com/Quantus-Network"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        0
+      ],
+      "id": "3d7a091b-e5a3-41b7-aa6b-83707caaf5e4",
+      "name": "Get repositories for an organization",
+      "webhookId": "230f31d1-a91d-4f54-9f0a-f7fa71b61c7e",
+      "credentials": {
+        "githubApi": {
+          "id": "wlMsuzzzmZgobq4N",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "full_name",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        512,
+        0
+      ],
+      "id": "3cd4789e-faba-41d9-be04-d5111aac95fe",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $json.full_name }}/events?per_page=100&sort=created",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github.v3+json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        0
+      ],
+      "id": "e0af7471-bcd6-492e-ae12-923a98a6ba73",
+      "name": "HTTP Request",
+      "credentials": {
+        "githubApi": {
+          "id": "wlMsuzzzmZgobq4N",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const now = new Date();\nconst yesterday = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();\nconsole.log('items', items.map(item => item.json.repo.name));\nlet filtered = items.filter(item => item.json.created_at > yesterday);\n// console.log({filtered});\nreturn filtered;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        0
+      ],
+      "id": "7a142651-bf4e-4e03-82cd-551f0e95e380",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ JSON.stringify($json.github_events) }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpful assistant creating a report for the CTO (chief technology officer). The input data represents all github events from the past week. Please summarize the data into a brief but useful report with statistics and anything requiring attention. Please format the report in markdown as it will be viewed in github."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        0
+      ],
+      "id": "01d83f76-b8dd-4ded-9a0d-0e2a974f4076",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        224
+      ],
+      "id": "b1afa2cd-aa3b-4e07-bce7-15c105f36065",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NDQizgThnWv5PPsY",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "github_events",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1216,
+        -176
+      ],
+      "id": "20a1911a-74ae-4699-b3d3-56f136298c88",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "Quantus-Network",
+          "mode": "name"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n-workflows",
+          "mode": "list",
+          "cachedResultName": "n8n-workflows",
+          "cachedResultUrl": "https://github.com/Quantus-Network/n8n-workflows"
+        },
+        "filePath": "=github/weekly-update-{{ $now.toFormat('yyyy-MM-dd-HH:mm:ss') }}.md",
+        "fileContent": "={{ $json.output }}",
+        "commitMessage": "n8n weekly report"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        1776,
+        0
+      ],
+      "id": "c07738d2-c8e0-4896-a5eb-e28ef39658c9",
+      "name": "Create a file",
+      "webhookId": "9d6f20e7-8077-4324-99e5-9a71b686e5bb",
+      "credentials": {
+        "githubApi": {
+          "id": "l5K0RBQeQWmszfoi",
+          "name": "GitHub account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get repositories for an organization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get repositories for an organization": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "bc05ffe4-6e55-4f0b-a99d-f0f804c67d9e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d152aa75565389bd7a8ee82ce8460498f8b92a703e9fcb2df0fad6538fd11ad2"
+  },
+  "id": "E4xI4y3hFaGcDV0L",
+  "tags": []
+}
