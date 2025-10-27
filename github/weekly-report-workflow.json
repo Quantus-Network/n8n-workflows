@@ -1,5 +1,5 @@
 {
-  "name": "My workflow",
+  "name": "Github",
   "nodes": [
     {
       "parameters": {
@@ -41,8 +41,8 @@
       "webhookId": "230f31d1-a91d-4f54-9f0a-f7fa71b61c7e",
       "credentials": {
         "githubApi": {
-          "id": "wlMsuzzzmZgobq4N",
-          "name": "GitHub account"
+          "id": "ttv9nqiVozQkKl3x",
+          "name": "GitHub n8n writer"
         }
       }
     },
@@ -62,7 +62,7 @@
     },
     {
       "parameters": {
-        "url": "=https://api.github.com/repos/{{ $json.full_name }}/events?per_page=100&sort=created",
+        "url": "=https://api.github.com/repos/{{ $json.full_name }}/events?per_page=300&sort=created",
         "authentication": "predefinedCredentialType",
         "nodeCredentialType": "githubApi",
         "sendHeaders": true,
@@ -86,19 +86,19 @@
       "name": "HTTP Request",
       "credentials": {
         "githubApi": {
-          "id": "wlMsuzzzmZgobq4N",
-          "name": "GitHub account"
+          "id": "N0YWNFnoFQ5kNsND",
+          "name": "GitHub Quantus Network"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "const now = new Date();\nconst yesterday = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();\nconsole.log('items', items.map(item => item.json.repo.name));\nlet filtered = items.filter(item => item.json.created_at > yesterday);\n// console.log({filtered});\nreturn filtered;"
+        "jsCode": "const now = new Date();\nconst lastWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();\nconsole.log('items', items.map(item => item.json.repo.name));\nlet filtered = items.filter(item => item.json.created_at > lastWeek);\n// console.log({filtered});\nreturn filtered;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1072,
+        928,
         0
       ],
       "id": "7a142651-bf4e-4e03-82cd-551f0e95e380",
@@ -110,7 +110,7 @@
         "text": "={{ JSON.stringify($json.github_events) }}",
         "hasOutputParser": true,
         "options": {
-          "systemMessage": "=You are a helpful assistant creating a report for the CTO (chief technology officer). The input data represents all github events from the past week. Please summarize the data into a brief but useful report with statistics and anything requiring attention. Please format the report in markdown as it will be viewed in github."
+          "systemMessage": "=You are a helpful assistant creating a report for the CTO (chief technology officer). The input data represents all github events from the past week. EACH ONE should be represented at least once in the report. \n\nThe format of the report should be\n\nSTATS\nACTIVITY BY CATEGORY\n - PULL REQUESTS\n  - COMMITS\n   - USER\nREQUIRES ATTENTION\n\nInclude ALL pull requests and ALL commits, including those to branches not in a pull request explicitly. Please provide links to ALL PRs, commits and users. Please do not include comments.\n\nFormat the report in markdown as it will be viewed in github. You can put some emojis in there."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -124,26 +124,6 @@
     },
     {
       "parameters": {
-        "modelName": "models/gemini-2.0-flash",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
-      "typeVersion": 1,
-      "position": [
-        1424,
-        224
-      ],
-      "id": "b1afa2cd-aa3b-4e07-bce7-15c105f36065",
-      "name": "Google Gemini Chat Model",
-      "credentials": {
-        "googlePalmApi": {
-          "id": "NDQizgThnWv5PPsY",
-          "name": "Google Gemini(PaLM) Api account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "aggregate": "aggregateAllItemData",
         "destinationFieldName": "github_events",
         "options": {}
@@ -151,8 +131,8 @@
       "type": "n8n-nodes-base.aggregate",
       "typeVersion": 1,
       "position": [
-        1216,
-        -176
+        1152,
+        0
       ],
       "id": "20a1911a-74ae-4699-b3d3-56f136298c88",
       "name": "Aggregate"
@@ -187,8 +167,56 @@
       "webhookId": "9d6f20e7-8077-4324-99e5-9a71b686e5bb",
       "credentials": {
         "githubApi": {
-          "id": "l5K0RBQeQWmszfoi",
-          "name": "GitHub account 2"
+          "id": "ttv9nqiVozQkKl3x",
+          "name": "GitHub n8n writer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "organization",
+        "owner": {
+          "__rl": true,
+          "value": "Quantum-Canary",
+          "mode": "list",
+          "cachedResultName": "Quantum-Canary",
+          "cachedResultUrl": "https://github.com/Quantum-Canary"
+        },
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        224
+      ],
+      "id": "8fb96ade-18d0-4c5c-b99a-42c4b905e6b9",
+      "name": "Get repositories for an organization1",
+      "webhookId": "230f31d1-a91d-4f54-9f0a-f7fa71b61c7e",
+      "credentials": {
+        "githubApi": {
+          "id": "ttv9nqiVozQkKl3x",
+          "name": "GitHub n8n writer"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "x-ai/grok-4-fast",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        208
+      ],
+      "id": "81507857-b3d3-4d3d-8b92-787e921efe18",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Qe1OYLBgY7gOs5wN",
+          "name": "OpenRouter account"
         }
       }
     }
@@ -250,17 +278,6 @@
         ]
       ]
     },
-    "Google Gemini Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "AI Agent": {
       "main": [
         [
@@ -282,13 +299,35 @@
           }
         ]
       ]
+    },
+    "Get repositories for an organization1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "bc05ffe4-6e55-4f0b-a99d-f0f804c67d9e",
+  "versionId": "38173679-700b-4970-9dbc-2de673ea382d",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "d152aa75565389bd7a8ee82ce8460498f8b92a703e9fcb2df0fad6538fd11ad2"
